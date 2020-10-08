@@ -18,5 +18,4 @@ header = {"Accept": "application/json",
           "Authorization": "",
           "X-Api-Key": config_object["client_id"],
           "x-gw-ims-org-id": config_object["org_id"],
-          "x-sandbox-name": "prod"
           }

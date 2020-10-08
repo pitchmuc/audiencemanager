@@ -39,7 +39,7 @@ class AdobeRequest:
             "iss": self.config['org_id'],  # org_id
             # technical_account_id
             "sub": self.config['tech_id'],
-            "https://ims-na1.adobelogin.com/s/ent_dataservices_sdk": True,
+            "https://ims-na1.adobelogin.com/s/ent_audiencemanagerplatform_sdk": True,
             "aud": "https://ims-na1.adobelogin.com/c/"+self.config['client_id']
         }
         encoded_jwt = audiencemanager.modules.jwt.encode(
@@ -52,7 +52,6 @@ class AdobeRequest:
         response = audiencemanager.modules.requests.post(self.config['tokenEndpoint'],
                                                          headers=header_jwt, data=payload)
         json_response = response.json()
-        print(json_response)
         token = json_response['access_token']
         self.config['token'] = token
         self.header.update(
