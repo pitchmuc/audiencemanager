@@ -866,3 +866,172 @@ class AudienceManager:
         elif format == "df":
             df = modules.pd.DataFrame(res)
             return df
+
+    def getDestinations(self,containsSegment:str=None,includeMasterDataSourceIdType:bool=None,includeMetrics:bool=True,includeAddressableAudienceMetrics:bool=False,format:str='df') -> object:
+        """
+        By default return a dataframe of the different destinations used.
+        Arguments:
+            containsSegment : OPTIONAL : Segment Id that has to be used in the destinations.
+            includeMasterDataSourceIdType : OPTIONAL : If set to true, it includes the Master Data Source ID
+            includeMetrics : OPTIONAL : returns metrics for the destinations (default True)
+            includeAddressableAudienceMetrics : OPTIONAL : returns the addressable audience information (default False)
+            format : OPTIONAL : by default (df) returning a dataframe of the information. Can return raw answer by setting "raw".
+        """
+        path = "/destinations/"
+        params = {}
+        if includeMasterDataSourceIdType:
+            params["includeMasterDataSourceIdType"] = includeMasterDataSourceIdType
+        if includeMetrics:
+            params["includeMetrics"] = includeMetrics
+        if includeAddressableAudienceMetrics:
+            params["includeAddressableAudienceMetrics"] = includeAddressableAudienceMetrics
+        if containsSegment is not None:
+            params["containsSegment"] = containsSegment
+        res = self.connector.getData(self.endpoint + path, params=params, headers=self.header)
+        if format == "raw":
+            return res
+        elif format == "df":
+            df = modules.pd.DataFrame(res)
+            return df
+    
+    def getDestinationsLimits(self)->dict:
+        """
+        Return the limit of the destination.
+        """
+        path = "/destinations/limits"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def getDestinationHistory(self, destinationId: str = None) -> dict:
+        """
+        Return the outbound batch job history information for a specified destination and time period.
+        Arguments:
+            destinationId : REQUIRED : destination ID to be used.
+        """
+        if destinationId is None:
+            raise Exception("require a destination ID")
+        path = f"/destinations/{destinationId}/history/outbound/"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def getDestination(self, destinationId: str = None)->dict:
+        """
+        Return a destination information based on its ID.
+        Arguments:
+            destinationId : REQUIRED : destination ID to be used.
+        """
+        if destinationId is None:
+            raise Exception("require a destination ID")
+        path = f"/destinations/{destinationId}"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        return res
+
+    def deleteDestination(self, destinationId: str = None)->str:
+        """
+        Delete a destination based on its ID.
+        Arguments:
+            destinationId : REQUIRED : destination ID to be deleted.
+        """
+        if destinationId is None:
+            raise Exception("require a destination ID")
+        path = f"/destinations/{destinationId}"
+        res = self.connector.deleteData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def createDestination(self, data: dict = None)->dict:
+        """
+        Create a destination based on the data passed on the argument.
+        Argument:
+            data : REQUIRED : Dictionary providing the required information to create a destination.
+        """
+        if data is None or type(data) != dict:
+            raise Exception("Require a dictionary that contains the information to create the connection")
+        if 'name' not in data.keys():
+            raise ValueError("Requires a name for the connection")
+        path = "/destinations/"
+        res = self.connector.postData(self.endpoint+path, data=data,headers=self.header)
+        return res
+    
+    def updateDestination(self, destinationId: str = None, data: dict = None) -> dict:
+        """
+        Update a destination based on the data passed on the argument.
+        Argument:
+            destinationId : REQUIRED : ID of the destination to be created
+            data : REQUIRED : Dictionary providing the required information to create a destination.
+        """
+        if destinationId is None:
+            raise ValueError("destinationId is required ")
+        if data is None or type(data) != dict:
+            raise Exception("Require a dictionary that contains the information to create the connection")
+        if 'name' not in data.keys():
+            raise ValueError("Requires a name for the connection")
+        path = f"/destinations/{destinationId}"
+        res = self.connector.putData(self.endpoint+path, data=data,headers=self.header)
+        return res
+    
+    def getDestinationMappings(self, destinationId: str = None, includeMetrics: bool = True, includeAddressableAudienceMetrics: bool = None, includeDeletedEntities: bool = None) -> dict:
+        """
+        Returns all the destination mappings for a specific destination by 'destinationId'.
+        Arguments:
+            destinationId : REQUIRED : destination ID to look for.
+            includeMetrics : OPTIONAL : returns the metrics for the destination. (default True)
+            includeAddressableAudienceMetrics : OPTIONAL : if set to True returns the addressable audience metrics.(default None)
+            includeDeletedEntities : OPTIONAL : if set to True, return the information with deleted entities. (default None)
+        """
+        if destinationId is None:
+            raise Exception("Requires a destinationId parameter")
+        params = {}
+        if includeMetrics:
+            params["includeMetrics"] = includeMetrics
+        if includeAddressableAudienceMetrics:
+            params["includeAddressableAudienceMetrics"] = includeAddressableAudienceMetrics
+        if includeDeletedEntities:
+            params["includeDeletedEntities"] = includeDeletedEntities
+        path = f"/destinations/{destinationId}/mappings/"
+        res = self.connector.getData(self.endpoint+path, params=params, headers=self.header)
+        return res
+
+    def getDestinationMapping(self,destinationId : str = None, mappingId : str = None)->dict:
+        """
+        Return a single destination mapping by combination of destinationId and destinationMappingId.
+        Arguments:
+            destinationId : REQUIRED : destination ID to be used.
+            mappingId : REQUIRED : destination mapping ID to be used
+        """
+        if destinationId is None or mappingId is None:
+            raise Exception("destinationId and mappingId are required")
+        path = f"/destinations/{destinationId}/mappings/{mappingId}"
+        res = self.connector.getData(self.endpoint+path, headers=self.header)
+        return res
+    
+    def deleteDestinationMapping(self,destinationId : str = None, mappingId : str = None)->str:
+        """
+        Delete a single destination mapping by combination of destinationId and destinationMappingId.
+        Arguments:
+            destinationId : REQUIRED : destination ID to be deleted.
+            mappingId : REQUIRED : destination mapping ID to be deleted.
+        """
+        if destinationId is None or mappingId is None:
+            raise Exception("destinationId and mappingId are required")
+        path = f"/destinations/{destinationId}/mappings/{mappingId}"
+        res = self.connector.deleteData(self.endpoint+path, headers=self.header)
+        return res
+    
+    def getDestinationSegmentImpressions(self,includeDestinationName:bool=True,includeSegmentName:bool=True,includeFeedIds:bool=None)->list:
+        """
+        Returns the impressions for the segment on a destination.
+        Arguments:
+            includeDestinationName : OPTIONAL : Includes destination name in the response (default True)
+            includeSegmentName : OPTIONAL : Includes segment name in the response
+            includeFeedIds : OPTIONAL : Includes feed IDs in use with segment impressions
+        """
+        path = "/destinations/segment-impressions/"
+        params={}
+        if includeDestinationName:
+            params["includeDestinationName"] = includeDestinationName
+        if includeSegmentName:
+            params["includeSegmentName"] = includeSegmentName
+        if includeFeedIds:
+            params["includeFeedIds"] = includeFeedIds
+        res = self.connector.getData(self.endpoint + path, params=params, headers=self.header)
+        return res
