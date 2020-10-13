@@ -1035,3 +1035,94 @@ class AudienceManager:
             params["includeFeedIds"] = includeFeedIds
         res = self.connector.getData(self.endpoint + path, params=params, headers=self.header)
         return res
+
+    def getDerivedSignals(self,format:str='df')->object:
+        """
+        Get the derived signals associated with this AAM instance.
+        Arguments:
+            format : OPTIONAL : return a dataframe ("df") by default , but can return raw response ("raw")
+        """
+        path = "/signals/derived"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        if format == "raw":
+            return res
+        elif format == "df":
+            df = modules.pd.DataFrame(res)
+            return df
+    
+    def getDerivedSignal(self, signalId: str = None) -> dict:
+        """
+        Retrieve a single derived ID.
+        Arguments:
+            signalId : REQUIRED : Derived signal ID to be retrieved. 
+        """
+        if signalId is None:
+            raise Exception("signalId argument is required")
+        path = f"/signals/derived/{signalId}"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def deleteDerivedSignal(self, signalId: str = None) -> str:
+        """
+        Delete a single derived ID.
+        Arguments:
+            signalId : REQUIRED : Derived signal ID to be deleted. 
+        """
+        if signalId is None:
+            raise Exception("signalId argument is required")
+        path = f"/signals/derived/{signalId}"
+        res = self.connector.deleteData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def createDerivedSignal(self, sourceKey: str = None, sourceValue: str = None, targetKey: str = None, targetValue: str = None, integrationCode: str = "") -> dict:
+        """
+        Create a derived signal based on the information passed.
+        Arguments:
+            sourceKey : REQUIRED : signal key that the rule will be based on.
+            sourceValue : REQUIRED : signal value that the rule will look for.
+            targetKey : REQUIRED : target key that the signal will create.
+            targetValue : REQUIRED : target value that the signal will create.
+            integrationCode : OPTIONAL : integration code for the signal.
+        """
+        if sourceKey is None or sourceValue is None:
+            raise ValueError("sourceKey and sourceValue are required to build the derived signal")
+        if targetKey is None or targetValue is None:
+            raise ValueError("targetKey and targetValue are required to build the derived signal")
+        path = "/signals/derived"
+        obj = {
+            "sourceKey": sourceKey,
+            "sourceValue": sourceValue,
+            "targetKey": targetKey,
+            "targetValue": targetValue,
+            "integrationCode":integrationCode
+        }
+        res = self.connector.postData(self.endpoint + path, data=obj, headers=self.header)
+        return res
+    
+    def updateDerivedSignal(self, signalId:str=None,sourceKey: str = None, sourceValue: str = None, targetKey: str = None, targetValue: str = None, integrationCode: str = "") -> dict:
+        """
+        Update a derived signal based on the information passed.
+        Arguments:
+            signalId : REQUIRED : derived signal ID to be updated.
+            sourceKey : REQUIRED : signal key that the rule will be based on.
+            sourceValue : REQUIRED : signal value that the rule will look for.
+            targetKey : REQUIRED : target key that the signal will create.
+            targetValue : REQUIRED : target value that the signal will create.
+            integrationCode : OPTIONAL : integration code for the signal.
+        """
+        if signalId is None:
+            raise Exception("requires a signal ID to be specified")
+        if sourceKey is None or sourceValue is None:
+            raise ValueError("sourceKey and sourceValue are required to build the derived signal")
+        if targetKey is None or targetValue is None:
+            raise ValueError("targetKey and targetValue are required to build the derived signal")
+        path = f"/signals/derived/{signalId}"
+        obj = {
+            "sourceKey": sourceKey,
+            "sourceValue": sourceValue,
+            "targetKey": targetKey,
+            "targetValue": targetValue,
+            "integrationCode":integrationCode
+        }
+        res = self.connector.putData(self.endpoint + path, data=obj, headers=self.header)
+        return res
