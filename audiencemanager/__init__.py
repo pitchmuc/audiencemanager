@@ -133,19 +133,23 @@ class AudienceManager:
                                    parentids=parentids, folderCounts=folderCounts, paths=paths)  # recursion
         return ids, names, parentids, folderCounts, paths
 
-    def getTraits(self, folderId: int = None, integrationCode: str = None, dataSourceIds: list = None, includeDetails: bool = False, format: str = 'df')->object:
+    def getTraits(self, folderId: int = None, includeMetrics:bool=True,integrationCode: str = None, dataSourceIds: list = None, includeDetails: bool = False, format: str = 'df',save:bool=False)->object:
         """
         Return traits following the parameters provided.
         Can return 2 type of result, a dataframe or a list. 
         Arguments:
             folderId : OPTIONAL : Only return traits from the selected folder.
+            includeMetrics : OPTIONAL : Include the trait population (default True)
             integrationCode : OPTIONAL : Returns traits that contain this integration code.
             dataSourceId : OPTIONAL : List of dataSourceIds. Returns traits that belong to the selected data sources.  
             includeDetails : OPTIONAL : For True, returns additional details for the traits. Additional returned values include ttl,integrationCode, comments, traitRule, traitRuleVersion, and type.
             format : OPTIONAL : default "df" that returns a dataframe, you can also return the raw format ("raw")
+            save : OPTIONAL : if set to true, create a file to save the data.
         """
         path = "/traits/"
         params = {}
+        if includeMetrics:
+            params["includeMetrics"] = includeMetrics
         if folderId is not None:
             params["folderId"] = folderId
         if integrationCode is not None:
@@ -162,9 +166,14 @@ class AudienceManager:
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('traits.json', "w") as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('traits.csv',index=False)
             return df
 
     def getTrait(self, traitId: str = None, intCode: str = None)->dict:
@@ -415,7 +424,7 @@ class AudienceManager:
             self.endpoint+path, data=obj, headers=self.header)
         return res
 
-    def getSegments(self, includeInUseStatus: bool = None, status: str = None, containsTrait: int = None, dataSourceId: int = None, mergeRuleDataSourceId: int = None, includeMetrics: bool = True, includeTraitDataSourceIds: bool = False, includeAddressableAudienceMetrics: bool = False, format: str = 'df')->object:
+    def getSegments(self, includeInUseStatus: bool = None, status: str = None, containsTrait: int = None, dataSourceId: int = None, mergeRuleDataSourceId: int = None, includeMetrics: bool = True, includeTraitDataSourceIds: bool = False, includeAddressableAudienceMetrics: bool = False, format: str = 'df',save:bool=False)->object:
         """
         Returns either a list or a dataframe of segments depending the type of output you select.
         Arguments:
@@ -428,6 +437,7 @@ class AudienceManager:
             includeTraitDataSourceIds : OPTIONAL : For true, returns the data source IDs of the traits that build up this segment. (default False)
             includeAddressableAudienceMetrics : OPTIONAL : For true, returns addressable audience metrics in the API response (default False)
             format : OPTIONAL : by default returns a dataframe ("df"), can return the list by putting "raw"
+            save : OPTIONAL : if set to True will save the data in a file.
         """
         path = "/segments/"
         params = {}
@@ -449,9 +459,14 @@ class AudienceManager:
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open("segment.json", 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('segments.csv',index=False)
             return df
 
     def getSegment(self, segId: str)->dict:
@@ -670,7 +685,7 @@ class AudienceManager:
         return res
 
     def getDataSources(self, inboundOnly: bool = None, outboundOnly: bool = None, integrationCode: str = None, includeThirdParty: bool = None, modelingEnabled: bool = None,
-                       availableForContainersOnly: bool = None, excludeReportSuites: bool = None, format: str = 'df')->dict:
+                       availableForContainersOnly: bool = None, excludeReportSuites: bool = None, format: str = 'df',save:bool=False)->dict:
         """ 
         Returns the datasources for that instances.
         Arguments:
@@ -682,6 +697,7 @@ class AudienceManager:
             availableForContainersOnly : OPTIONAL : Filter data sources that is available for creating containers.
             excludeReportSuites : OPTIONAL : Exclude Report Suite DataSources in the result.
             format : OPTIONAL : return a dataframe by default ("df"), but can return raw response ("raw")
+            save : OPTIONAL : if set to True, save in a file.(default False)
         """
         path = "/datasources/"
         params = {}
@@ -702,9 +718,14 @@ class AudienceManager:
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save: 
+                with open('datasources.json', 'w') as f:
+                    f.write(modules.json.dumps(res))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('datasources.csv',index=False)
             return df
 
     def deleteDataSource(self, dataSourceId: str = None)->str:
@@ -775,7 +796,7 @@ class AudienceManager:
             self.endpoint+path, params=params, headers=self.header)
         return res
 
-    def getMostChangedTraits(self, interval: str = "1D", cutOff: int = 0, restrictType: str = None, format: str = 'raw')->dict:
+    def getMostChangedTraits(self, interval: str = "1D", cutOff: int = 0, restrictType: str = None, format: str = 'raw',save:bool=False)->dict:
         """
         returns information about the most changed traits for a given interval. 
         The response include compacted trait information, along with the trait metrics and deltas. 
@@ -786,6 +807,7 @@ class AudienceManager:
             restrictType : OPTIONAL : The trait type this list should be restricted to. Valid values are RULE_BASED_TRAIT, ON_BOARDED_TRAIT, and ALGO_TRAIT.
             By default, the response would be computed over all trait types.
             format : OPTIONAL : return raw response by default ("raw"), but can return a dataframe ("df")
+            save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
         path = "/reports/most-changed-traits"
         params = {'interval': interval, "cutOff": 0}
@@ -795,12 +817,17 @@ class AudienceManager:
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('mostChangedTraits.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('mostChangedTraits.csv')
             return df
 
-    def getMostChangedSegments(self, interval: str = "1D", cutOff: int = 0, format: str = 'raw')->dict:
+    def getMostChangedSegments(self, interval: str = "1D", cutOff: int = 0, format: str = 'raw',save:bool=False)->dict:
         """
         returns information about the most changed segments for a given interval. 
         The response include segments, along with the segment metrics and deltas. Pagination, and Sorting supported. 
@@ -809,18 +836,24 @@ class AudienceManager:
             interval : OPTIONAL : Interval for which most changed segments are computed. Valid values are (1D/7D/14D/30D/60D). Default value set to 1D.
             cutOff : OPTIONAL : specifies cutOff for total uniques needed in order for the segment to be qualified for consideration. Default is set to 0
             format : OPTIONAL : return raw response by default ("raw"), but can return a dataframe ("df")
+            save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
         path = "/reports//most-changed-segments"
         params = {'interval': interval, "cutOff": 0}
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('mostChangedSegments.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('mostChangedSegments.csv')
             return df
 
-    def getLargestTraits(self, interval: str = "1D", cutOff: int = 0, restrictType: str = None, format: str = 'raw')->dict:
+    def getLargestTraits(self, interval: str = "1D", cutOff: int = 0, restrictType: str = None, format: str = 'raw',save:bool=False)->dict:
         """
         Returns information about the largest traits for a given interval. The response include compacted trait information, along with the trait metrics. 
         Pagination, and Sorting supported. 
@@ -831,6 +864,7 @@ class AudienceManager:
             restrictType : OPTIONAL : The trait type this list should be restricted to. Valid values are RULE_BASED_TRAIT, ON_BOARDED_TRAIT, and ALGO_TRAIT.
             By default, the response would be computed over all trait types.
             format : OPTIONAL : return raw response by default ("raw"), but can return a dataframe ("df")
+            save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
         path = "/reports/largest-traits"
         params = {'interval': interval, "cutOff": 0}
@@ -840,12 +874,17 @@ class AudienceManager:
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('LargestTraits.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('LargestTraits.csv')
             return df
 
-    def getLargestSegments(self, interval: str = "1D", cutOff: int = 0, format: str = 'raw')->dict:
+    def getLargestSegments(self, interval: str = "1D", cutOff: int = 0, format: str = 'raw',save:bool=False)->dict:
         """
         Returns information about the largest segments for a given interval. The response include segments, along with the segment metrics and deltas. 
         Pagination, and Sorting supported. 
@@ -856,18 +895,24 @@ class AudienceManager:
             restrictType : OPTIONAL : The trait type this list should be restricted to. Valid values are RULE_BASED_TRAIT, ON_BOARDED_TRAIT, and ALGO_TRAIT.
             By default, the response would be computed over all trait types.
             format : OPTIONAL : return raw response by default ("raw"), but can return a dataframe ("df")
+            save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
         path = "/reports/largest-segments"
         params = {'interval': interval, "cutOff": 0}
         res = self.connector.getData(
             self.endpoint+path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('LargestSegments.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('LargestSegments.csv')
             return df
 
-    def getDestinations(self,containsSegment:str=None,includeMasterDataSourceIdType:bool=None,includeMetrics:bool=True,includeAddressableAudienceMetrics:bool=False,format:str='df') -> object:
+    def getDestinations(self,containsSegment:str=None,includeMasterDataSourceIdType:bool=None,includeMetrics:bool=True,includeAddressableAudienceMetrics:bool=False,format:str='df',save:bool=False) -> object:
         """
         By default return a dataframe of the different destinations used.
         Arguments:
@@ -876,6 +921,7 @@ class AudienceManager:
             includeMetrics : OPTIONAL : returns metrics for the destinations (default True)
             includeAddressableAudienceMetrics : OPTIONAL : returns the addressable audience information (default False)
             format : OPTIONAL : by default (df) returning a dataframe of the information. Can return raw answer by setting "raw".
+            save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
         path = "/destinations/"
         params = {}
@@ -889,9 +935,14 @@ class AudienceManager:
             params["containsSegment"] = containsSegment
         res = self.connector.getData(self.endpoint + path, params=params, headers=self.header)
         if format == "raw":
+            if save:
+                with open('destinations.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('destinations.csv')
             return df
     
     def getDestinationsLimits(self)->dict:
@@ -1036,18 +1087,24 @@ class AudienceManager:
         res = self.connector.getData(self.endpoint + path, params=params, headers=self.header)
         return res
 
-    def getDerivedSignals(self,format:str='df')->object:
+    def getDerivedSignals(self,format:str='df',save:bool=False)->object:
         """
         Get the derived signals associated with this AAM instance.
         Arguments:
             format : OPTIONAL : return a dataframe ("df") by default , but can return raw response ("raw")
+            save : OPTIONAL : if set to True, save the data in a file (default False)
         """
         path = "/signals/derived"
         res = self.connector.getData(self.endpoint + path, headers=self.header)
         if format == "raw":
+            if save:
+                with open('derivedSignals.json', 'w') as f:
+                    f.write(modules.json.dumps(res,indent=2))
             return res
         elif format == "df":
             df = modules.pd.DataFrame(res)
+            if save:
+                df.to_csv('derivedSignals.csv',index=False)
             return df
     
     def getDerivedSignal(self, signalId: str = None) -> dict:
