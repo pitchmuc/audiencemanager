@@ -96,6 +96,9 @@ class AdobeRequest:
         try:
             res_json = res.json()
         except:
+            if kwargs.get('verbose', True):
+                print("error")
+                print(res.text)
             res_json = {'error': 'Request Error'}
         return res_json
 
@@ -121,6 +124,9 @@ class AdobeRequest:
         try:
             res_json = res.json()
         except:
+            if kwargs.get('verbose', True):
+                print("error")
+                print(res.text)
             res_json = {'error': 'Request Error'}
         return res_json
 

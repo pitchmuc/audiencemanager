@@ -3,7 +3,7 @@ Adobe Audience Manager Python wrapper to manage audience manager data.
 It supports JWT integration.
 """
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 from audiencemanager import *
 from audiencemanager import modules
 from audiencemanager import config
@@ -210,22 +210,25 @@ class AudienceManager:
             path = f"/traits/ic:{intCode}"
         if traitId is not None:
             path = f"/traits/{traitId}"
-        res = self.connector.delete(self.endpoint+path, headers=self.header)
+        res = self.connector.deleteData(self.endpoint+path, headers=self.header)
         return res
 
-    def deleteBulkTraits(self, traitIds: list = None)->str:
+    def deleteBulkTraits(self, traitIds: list = None, verbose:bool=False) -> str:
         """
         Delete the traits passed in the traitIds list parameter.
         Arguments:
             traitIds : REQUIRED : list of trait Ids to be deleted
+            verbose : OPTIONAL : print information if set to true. 
         """
         path = "/traits/bulk-delete"
         if traitIds is None or type(traitIds) != list:
             raise Exception(
                 'Require a list of ids to be deleted in traitIds parameter')
-        data = [str(el) for el in traitIds]
+        data = [el for el in traitIds]
+        if verbose:
+            print(f"Deleting {len(data)} traits")
         res = self.connector.postData(
-            self.endpoint + path, data=data, headers=self.header)
+            self.endpoint + path, data=data, headers=self.header,verbose=verbose)
         return res
 
     def getTraitLimit(self)->dict:
@@ -509,19 +512,22 @@ class AudienceManager:
                 self.endpoint+path, headers=self.header)
             return res
 
-    def deleteBulkSegments(self, segmentIds: list = None):
+    def deleteBulkSegments(self, segmentIds: list = None,verbose:bool=False):
         """
         Delete the list of segments passed in the parameter.
         Arguments:
             segmentIds : REQUIRED : list of the segment id to be deleted.
+            verbose : OPTIONAL : Prn information if set to True.
         """
         path = "/segments/bulk-delete"
         if segmentIds is None or type(segmentIds) != list:
             raise Exception(
                 'Require a list of ids to be deleted in traitIds parameter')
-        data = [str(el) for el in segmentIds]
+        data = [el for el in segmentIds]
+        if verbose:
+            print(f"Deleting {len(data)} Segments")
         res = self.connector.postData(
-            self.endpoint + path, data=data, headers=self.header)
+            self.endpoint + path, data=data, headers=self.header,verbose=True)
         return res
 
     def createSegment(self, name: str = None, segmentRule: str = None, folderId: int = None, dataSourceId: int = None, mergeRuleDataSourceId: int = None, integrationCode: str = None, **kwargs)->dict:
