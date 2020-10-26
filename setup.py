@@ -16,7 +16,7 @@ CLASSIFIERS = [
 
 setup(
     name='audiencemanager',
-    version="0.0.2",
+    version="0.0.3",
     license='GPL',
     description='Adobe Audience Manager API python wrapper',
     long_description=long_description,
@@ -36,5 +36,5 @@ setup(
         'PyJWT',
         ],
     classifiers=CLASSIFIERS,
-    python_requires='>=3.7'
+    python_requires='>=3.6'
 )

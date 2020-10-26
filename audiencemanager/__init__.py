@@ -3,14 +3,14 @@ Adobe Audience Manager Python wrapper to manage audience manager data.
 It supports JWT integration.
 """
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 from audiencemanager import *
 from audiencemanager import modules
 from audiencemanager import config
 from audiencemanager import connector
 
 
-def createConfigFile(sandbox: bool = False, verbose: object = False, **kwargs)->None:
+def createConfigFile(verbose: object = False, **kwargs)->None:
     """
     This function will create a 'config_aam.json' file where you can store your access data.
     Arguments:
@@ -26,13 +26,13 @@ def createConfigFile(sandbox: bool = False, verbose: object = False, **kwargs)->
         'secret': "<YourSecret>",
         'pathToKey': '<path/to/your/privatekey.key>',
     }
-    if sandbox:
-        json_data['sandbox-name'] = "<your_sandbox_name>"
-    filename = f"{kwargs.get('filename', 'config_aam')}.json"
+    filename = f"{kwargs.get('filename', 'config_aam')}"
+    if '.json' not in filename:
+        filename = filename + '.json'
     with open(filename, 'w') as cf:
         cf.write(modules.json.dumps(json_data, indent=4))
     if verbose:
-        print(f'File created at this location :{config._cwd}/{filename}')
+        print(f'File created at this location :{modules.os.getcwd()}{modules.os.sep}{filename}')
 
 
 def _find_path(path: str) -> object:
@@ -1188,4 +1188,83 @@ class AudienceManager:
             "integrationCode":integrationCode
         }
         res = self.connector.putData(self.endpoint + path, data=obj, headers=self.header)
+        return res
+    
+    def getModels(self, search: str = None,includeDataSources:bool=False,usesDataSource:bool=False,containsSeedFromDataSource:bool=False,save:bool=False,**kwargs)->object:
+        """
+        This returns the algorithmic traits and their summary.
+        Arguments:
+            search : OPTIONAL : Returns results based on the specified string you want to use as a search parameter. Looks in any fields.
+            includeDataSources : OPTIONAL : Select true to return information about data sources in the model information.
+            usesDataSource : OPTIONAL : Returns models that use this data source ID.
+            containsSeedFromDataSource : OPTIONAL : Returns information about the models that uses a trait or segment from this data source ID as a baseline seed.
+            save : OPTIONAL : if set to True, create a file to save the result.
+        """
+        path = "/models"
+        params = {"pageSize":kwargs.get("pageSize",100)}
+        if search:
+            params["search"] = search
+        if includeDataSources:
+            params["includeDataSources"] = includeDataSources
+        if usesDataSource:
+            params["usesDataSource"] = usesDataSource
+        if containsSeedFromDataSource:
+            params["containsSeedFromDataSource"] = containsSeedFromDataSource
+        res = self.connector.getData(self.endpoint + path, headers=self.header, params=params)
+        df = modules.pd.DataFrame(res)
+        if save:
+            df.to_csv('models.csv',index=False)
+        return df
+    
+    def deleteModel(self, modelId: str) -> str:
+        """
+        Delete the model ID specified in the parameter.
+        Arguments: 
+            modelId : REQUIRED : model ID to be deleted.
+        """
+        if modelId is None:
+            raise Exception("Expected a model ID as parameter")
+        path = f"/models/{modelId}"
+        res = self.connector.deleteData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def getModel(self, modelId: str = None) -> dict:
+        """
+        Return a dictionary of the model details.
+        Arguments:
+            modelId : REQUIRED : the model ID to be retrieved.
+        """
+        if modelId is None:
+            raise Exception("Expected a model ID as parameter")
+        path = f"/models/{modelId}"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        return res
+    
+    def getModelTraits(self, modelId: str = None, format:str='df') -> object:
+        """
+        Returns the most influencial traits used in a specific models.
+        Arguments:
+            modelId : REQUIRE : the model ID to be retrieved
+            format : OPTIONAL : by default returns a dataframe ("df"), can return the default list "raw".
+        """
+        if modelId is None:
+            raise Exception("Expected a model ID as parameter")
+        path = f"/models/{modelId}/runs/latest/traits"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
+        if format == "raw":
+            return res
+        elif format == "df":
+            df = modules.pd.DataFrame(res)
+            return df
+
+    def getModelStats(self, modelId: str = None) -> dict:
+        """
+        Returns accuracy and reach values for your algorithmic model.
+        Arguments:
+            modelId : REQUIRE : the model ID to be retrieved
+        """
+        if modelId is None:
+            raise Exception("Expected a model ID as parameter")
+        path = f"/models/{modelId}/runs/latest/stats"
+        res = self.connector.getData(self.endpoint + path, headers=self.header)
         return res
