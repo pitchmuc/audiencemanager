@@ -1,5 +1,5 @@
 import audiencemanager
-
+from audiencemanager import modules
 
 class AdobeRequest:
     """
@@ -110,24 +110,27 @@ class AdobeRequest:
         if headers is None:
             headers = self.header
         if params == None and data == None:
-            res = audiencemanager.modules.requests.post(
+            res = modules.requests.post(
                 endpoint, headers=headers)
         elif params != None and data == None:
-            res = audiencemanager.modules.requests.post(
+            res = modules.requests.post(
                 endpoint, headers=headers, params=params)
         elif params == None and data != None:
-            res = audiencemanager.modules.requests.post(endpoint, headers=headers,
-                                                        data=audiencemanager.modules.json.dumps(data))
+            res = modules.requests.post(endpoint, headers=headers,
+                                                        data=modules.json.dumps(data))
         elif params != None and data != None:
-            res = audiencemanager.modules.requests.post(endpoint, headers=headers,
-                                                        params=params, data=audiencemanager.modules.json.dumps(data))
+            res = modules.requests.post(endpoint, headers=headers,
+                                                        params=params, data=modules.json.dumps(data))
         try:
             res_json = res.json()
         except:
             if kwargs.get('verbose', True):
                 print("error")
                 print(res.text)
-            res_json = {'error': 'Request Error'}
+            if res.status_code >=200 & res.status_code <300:
+                res_json = {'success': f'no json - status code : {res.status_code}'}
+            else:
+                res_json = {'error': 'Request Error'}
         return res_json
 
     def patchData(self, endpoint: str, params: dict = None, data=None, headers: dict = None, *args, **kwargs):
@@ -182,13 +185,14 @@ class AdobeRequest:
         if headers is None:
             headers = self.header
         if params == None:
-            res = audiencemanager.modules.requests.delete(
+            resultDelete = modules.requests.delete(
                 endpoint, headers=headers)
         elif params != None:
-            res = audiencemanager.modules.requests.delete(
+            resultDelete = modules.requests.delete(
                 endpoint, headers=headers, params=params)
         try:
-            status_code = res.status_code
-        except:
-            status_code = {'error': 'Request Error'}
-        return status_code
+            res = resultDelete.json()
+        except Exception as e:
+            print(e)
+            res = {'error': 'Request Error'}
+        return res
