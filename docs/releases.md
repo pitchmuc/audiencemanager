@@ -1,5 +1,10 @@
 # Releases for Audience Manager API python wrapper
 
+## Version 0.0.5
+
+* chaning architecture to make it more compatible with pypi guidelines
+* adding support for new version of `pyJWT`
+
 ## Version 0.0.3
 
 * Adding new methods for Algorithmic traits:
