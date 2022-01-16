@@ -1,6 +1,8 @@
-from audiencemanager import modules
 from audiencemanager import config
 from audiencemanager import connector
+from copy import deepcopy
+import json
+import pandas as pd
 
 class AudienceManager:
     """
@@ -12,7 +14,7 @@ class AudienceManager:
         """
         Instantiate the Audience Manager class.
         """
-        self.config = modules.deepcopy(config_object)
+        self.config = deepcopy(config_object)
         self.connector = connector.AdobeRequest(
             config_object=config_object)
         self.endpoint = "https://aam.adobe.io/v1"
@@ -93,10 +95,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('traits.json', "w") as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('traits.csv',index=False)
             return df
@@ -297,7 +299,7 @@ class AudienceManager:
                 'path': paths,
                 'folderCounts': folderCounts
             }
-            df = modules.pd.DataFrame(dict_folders)
+            df = pd.DataFrame(dict_folders)
             return df
 
     def createTraitFolder(self, name: str = None, parentFolderId: int = 0)->dict:
@@ -391,10 +393,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open("segment.json", 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('segments.csv',index=False)
             return df
@@ -560,7 +562,7 @@ class AudienceManager:
                 'path': paths,
                 'folderCounts': folderCounts
             }
-            df = modules.pd.DataFrame(dict_folders)
+            df = pd.DataFrame(dict_folders)
             return df
 
     def createSegmentFolder(self, name: str = None, parentFolderId: int = 0)->dict:
@@ -653,10 +655,10 @@ class AudienceManager:
         if format == "raw":
             if save: 
                 with open('datasources.json', 'w') as f:
-                    f.write(modules.json.dumps(res))
+                    f.write(json.dumps(res))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('datasources.csv',index=False)
             return df
@@ -752,10 +754,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('mostChangedTraits.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('mostChangedTraits.csv')
             return df
@@ -778,10 +780,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('mostChangedSegments.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('mostChangedSegments.csv')
             return df
@@ -809,10 +811,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('LargestTraits.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('LargestTraits.csv')
             return df
@@ -837,10 +839,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('LargestSegments.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('LargestSegments.csv')
             return df
@@ -870,10 +872,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('destinations.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('destinations.csv')
             return df
@@ -1032,10 +1034,10 @@ class AudienceManager:
         if format == "raw":
             if save:
                 with open('derivedSignals.json', 'w') as f:
-                    f.write(modules.json.dumps(res,indent=2))
+                    f.write(json.dumps(res,indent=2))
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             if save:
                 df.to_csv('derivedSignals.csv',index=False)
             return df
@@ -1138,7 +1140,7 @@ class AudienceManager:
         if containsSeedFromDataSource:
             params["containsSeedFromDataSource"] = containsSeedFromDataSource
         res = self.connector.getData(self.endpoint + path, headers=self.header, params=params)
-        df = modules.pd.DataFrame(res)
+        df = pd.DataFrame(res)
         if save:
             df.to_csv('models.csv',index=False)
         return df
@@ -1181,7 +1183,7 @@ class AudienceManager:
         if format == "raw":
             return res
         elif format == "df":
-            df = modules.pd.DataFrame(res)
+            df = pd.DataFrame(res)
             return df
 
     def getModelStats(self, modelId: str = None) -> dict:

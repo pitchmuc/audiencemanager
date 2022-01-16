@@ -1,4 +1,4 @@
-from audiencemanager import modules
+from pathlib import Path
 
 config_object = {
     "org_id": "",
@@ -9,7 +9,7 @@ config_object = {
     "companyid": "",
     "date_limit": 0,
     "tokenEndpoint": "https://ims-na1.adobelogin.com/ims/exchange/jwt",
-    "location": modules.Path.as_posix(modules.Path.cwd()),
+    "location": Path.as_posix(Path.cwd()),
     "token": ''
 }
 

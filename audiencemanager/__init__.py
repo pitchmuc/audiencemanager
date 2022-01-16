@@ -5,9 +5,10 @@ It supports JWT integration.
 
 from .audiencemanager import *
 from .__version__ import __version__
-from audiencemanager import modules
 from audiencemanager import config
 from audiencemanager import connector
+import json, os
+from pathlib import Path
 
 
 def createConfigFile(verbose: object = False, **kwargs)->None:
@@ -30,9 +31,9 @@ def createConfigFile(verbose: object = False, **kwargs)->None:
     if '.json' not in filename:
         filename = filename + '.json'
     with open(filename, 'w') as cf:
-        cf.write(modules.json.dumps(json_data, indent=4))
+        cf.write(json.dumps(json_data, indent=4))
     if verbose:
-        print(f'File created at this location :{modules.os.getcwd()}{modules.os.sep}{filename}')
+        print(f'File created at this location :{os.getcwd()}{os.sep}{filename}')
 
 
 def _find_path(path: str) -> object:
@@ -44,12 +45,12 @@ def _find_path(path: str) -> object:
 
     If the file does not exist with either the absolute and the relative path, returns `None`.
     """
-    if modules.Path(path).exists():
-        return modules.Path(path)
-    elif path.startswith('/') and modules.Path('.' + path).exists():
-        return modules.Path('.' + path)
-    elif path.startswith('\\') and modules.Path('.' + path).exists():
-        return modules.Path('.' + path)
+    if Path(path).exists():
+        return Path(path)
+    elif path.startswith('/') and Path('.' + path).exists():
+        return Path('.' + path)
+    elif path.startswith('\\') and Path('.' + path).exists():
+        return Path('.' + path)
     else:
         return None
 
@@ -62,8 +63,8 @@ def importConfigFile(path: str)-> None:
     if config_file_path is None:
         raise FileNotFoundError(
             f"Unable to find the configuration file under path `{path}`.")
-    with open(modules.Path(config_file_path), 'r') as file:
-        f = modules.json.load(file)
+    with open(Path(config_file_path), 'r') as file:
+        f = json.load(file)
         config.config_object['org_id'] = f['org_id']
         config.header["x-gw-ims-org-id"] = config.config_object['org_id']
         if 'api_key' in f.keys():
