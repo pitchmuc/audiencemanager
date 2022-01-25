@@ -4,6 +4,8 @@
 
 * chaning architecture to make it more compatible with pypi guidelines
 * adding support for new version of `pyJWT`
+Patch
+* removing the trailing slash for most of the endpoints
 
 ## Version 0.0.3
 

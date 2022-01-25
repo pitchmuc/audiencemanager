@@ -220,7 +220,7 @@ class AudienceManager:
         if traitType not in ["RULE_BASED_TRAIT", "ON_BOARDED_TRAIT", "ALGO_TRAIT"]:
             raise ValueError(
                 "traitType should be one of the following value [RULE_BASED_TRAIT, ON_BOARDED_TRAIT, ALGO_TRAIT]")
-        path = "​/traits​/"
+        path = "​/traits​"
         obj = {
             "name": name,
             "traitType": traitType,
@@ -284,7 +284,7 @@ class AudienceManager:
         params = {}
         if includeThirdParty:
             params['includeThirdParty'] = includeThirdParty
-        path = "/folders/traits/"
+        path = "/folders/traits"
         res = self.connector.getData(self.endpoint+path,
                                      params=params, headers=self.header)
         if format == "raw":
@@ -309,7 +309,7 @@ class AudienceManager:
             parentFolderId : REQUIRED : ID of the Parent folder. Default root folder (0)
             name : REQUIRED : name of the folder.
         """
-        path = "/folders/traits/"
+        path = "/folders/traits"
         if name is None:
             raise Exception("require a name for the folder")
         obj = {
@@ -371,7 +371,7 @@ class AudienceManager:
             format : OPTIONAL : by default returns a dataframe ("df"), can return the list by putting "raw"
             save : OPTIONAL : if set to True will save the data in a file.
         """
-        path = "/segments/"
+        path = "/segments"
         params = {}
         if includeMetrics:
             params['includeMetrics'] = True
@@ -572,7 +572,7 @@ class AudienceManager:
             parentFolderId : REQUIRED : ID of the Parent folder. Default root folder (0)
             name : REQUIRED : name of the folder.
         """
-        path = "/folders/segments/"
+        path = "/folders/segments"
         if name is None:
             raise Exception("require a name for the folder")
         obj = {
@@ -858,7 +858,7 @@ class AudienceManager:
             format : OPTIONAL : by default (df) returning a dataframe of the information. Can return raw answer by setting "raw".
             save : OPTIONAL : If set to True, will save the data in a file. (default False)
         """
-        path = "/destinations/"
+        path = "/destinations"
         params = {}
         if includeMasterDataSourceIdType:
             params["includeMasterDataSourceIdType"] = includeMasterDataSourceIdType
@@ -896,7 +896,7 @@ class AudienceManager:
         """
         if destinationId is None:
             raise Exception("require a destination ID")
-        path = f"/destinations/{destinationId}/history/outbound/"
+        path = f"/destinations/{destinationId}/history/outbound"
         res = self.connector.getData(self.endpoint + path, headers=self.header)
         return res
     
@@ -1011,7 +1011,7 @@ class AudienceManager:
             includeSegmentName : OPTIONAL : Includes segment name in the response
             includeFeedIds : OPTIONAL : Includes feed IDs in use with segment impressions
         """
-        path = "/destinations/segment-impressions/"
+        path = "/destinations/segment-impressions"
         params={}
         if includeDestinationName:
             params["includeDestinationName"] = includeDestinationName
